@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import joblib
 import numpy as np
 import json
 
 app = Flask(__name__)
+CORS(app)
 
 # Load model and feature list
 model = joblib.load("model/heart_disease_risk_model.pkl")
@@ -18,17 +20,13 @@ def index():
 def predict():
     try:
         data = request.get_json()
-
-        # Prepare input
         input_values = [data[feature] for feature in FEATURES]
         input_array = np.array([input_values])
 
-        # Get prediction and probability
         prediction = model.predict(input_array)[0]
-        probability = model.predict_proba(input_array)[0][1]  # probability of class 1
+        probability = model.predict_proba(input_array)[0][1]
         label = "At Risk" if prediction == 1 else "Low Risk"
 
-        # Return full response
         return jsonify({
             'prediction': int(prediction),
             'risk_label': label,
@@ -42,4 +40,5 @@ def predict():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
